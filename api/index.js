@@ -56,6 +56,11 @@ app.get("/api/quizzes/mine", authenticateFirebase, (req, res) =>
   quizDAO.getAllByUser(req, res)
 );
 
+// Obtener leaderboard del medallero
+app.get("/api/quizzes/leaderboard", authenticateFirebase, (req, res) =>
+  quizDAO.getLeaderboard(req, res)
+);
+
 // Configure port
 const PORT = process.env.PORT || 3000;
 

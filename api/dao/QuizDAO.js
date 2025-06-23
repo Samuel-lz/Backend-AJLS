@@ -59,6 +59,19 @@ class QuizDAO {
             else if (ratio >= 0.7) quiz.medal = "plata";
             else if (ratio >= 0.5) quiz.medal = "bronce";
             else quiz.medal = "ninguna";
+
+            // Calcular porcentaje
+            quiz.score.percentage = Math.round((correct / totalQuestions) * 100);
+
+            // Calcular calificación
+            const percent = quiz.score.percentage;
+            if (percent === 100) quiz.score.grade = "A+";
+            else if (percent >= 90) quiz.score.grade = "A";
+            else if (percent >= 80) quiz.score.grade = "B";
+            else if (percent >= 70) quiz.score.grade = "C";
+            else if (percent >= 60) quiz.score.grade = "D";
+            else quiz.score.grade = "F";
+
         }
         }
 
@@ -110,6 +123,33 @@ async getIncompleteByUser(req, res) {
             res.status(500).json({ message: `Error obteniendo quizzes: ${error.message}` });
         }
     }
+
+    // Dentro de QuizDAO.js
+async getLeaderboard(req, res) {
+  try {
+    const leaderboard = await this.model.find({ "progress.completed": true })
+      .populate("userId", "name email")
+      .sort({ "score.percentage": -1 })
+      .limit(10);
+
+    const formatted = leaderboard.map(entry => ({
+        _id: entry._id,
+        user: {
+            name: entry.userId?.name || "",
+            email: entry.userId?.email || ""
+        },
+        score: entry.score,
+        medal: entry.medal,
+        createdAt: entry.createdAt
+        }));
+
+        res.status(200).json(formatted);
+    } catch (error) {
+        console.error("Error al obtener leaderboard:", error);
+        res.status(500).json({ error: "Error al obtener leaderboard" });
+    }
+    }
+
 
 }
 module.exports = QuizDAO;
