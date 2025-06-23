@@ -1,11 +1,20 @@
 const admin = require("firebase-admin");
 const User = require("../models/User");
 
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(require("../../firebaseServiceAccountKey.json"))
-  });
-}
+  let serviceAccount;
+
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    serviceAccount = require("../../firebaseServiceAccountKey.json");
+  }
+
+  if (!admin.apps.length) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  }
+
 
 async function authenticateFirebase(req, res, next) {
   const authHeader = req.headers.authorization;
